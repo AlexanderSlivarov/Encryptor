@@ -1,21 +1,19 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <locale> 
 
 using namespace std;
 
-// Function to encrypt the text using a simple Caesar cipher
-void encrypt(const string& inputFile, const string& outputFile, int shift) {
-    ifstream inFile(inputFile);
+void encrypt(const string& text, const string& outputFile, int shift) {
     ofstream outFile(outputFile);
 
-    if (!inFile.is_open() || !outFile.is_open()) {
-        cout << "Error opening files!" << endl;
+    if (!outFile.is_open()) {
+        cout << "Грешка при отварянето на изходния файл!" << endl;
         return;
     }
 
-    char ch;
-    while (inFile.get(ch)) {
+    for (char ch : text) {
         if (isalpha(ch)) {
             char offset = islower(ch) ? 'a' : 'A';
             ch = (ch - offset + shift) % 26 + offset;
@@ -23,64 +21,84 @@ void encrypt(const string& inputFile, const string& outputFile, int shift) {
         outFile << ch;
     }
 
+    outFile.close();
+    cout << "Текстът е криптиран успешно и записан в " << outputFile << "!" << endl;
+}
+
+
+void decrypt(const string& inputFile, const string& outputFile, int shift) {
+    ifstream inFile(inputFile);
+    ofstream outFile(outputFile);
+
+    if (!inFile.is_open() || !outFile.is_open()) {
+        cout << "Грешка при отварянето на файловете!" << endl;
+        return;
+    }
+
+    char ch;
+    while (inFile.get(ch)) {
+        if (isalpha(ch)) {
+            char offset = islower(ch) ? 'a' : 'A';
+            ch = (ch - offset + (26 - (shift % 26))) % 26 + offset; 
+        }
+        outFile << ch;
+    }
+
     inFile.close();
     outFile.close();
-    cout << "File encrypted successfully!" << endl;
+    cout << "Файлът е декриптиран успешно и записан в " << outputFile << "!" << endl;
 }
 
-// Function to decrypt the text using a simple Caesar cipher
-void decrypt(const string& inputFile, const string& outputFile, int shift) {
-    // Decrypting is just encrypting with the negative shift
-    encrypt(inputFile, outputFile, 26 - (shift % 26)); // Decrypting is shifting backwards
-    cout << "File decrypted successfully!" << endl;
-}
 
-// Function to display the menu and get user choice
 void displayMenu() {
-    cout << "File Encryption/Decryption Tool" << endl;
-    cout << "1. Encrypt a file" << endl;
-    cout << "2. Decrypt a file" << endl;
-    cout << "3. Exit" << endl;
+    cout << "Инструмент за криптиране/декриптиране на текст" << endl;
+    cout << "1. Криптиране на текст" << endl;
+    cout << "2. Декриптиране на файл" << endl;
+    cout << "3. Изход" << endl;
 }
 
 int main() {
+    setlocale(LC_ALL, ""); 
     int choice;
-    string inputFile, outputFile;
+    string inputText, inputFile, outputFile; 
     int shift;
 
     while (true) {
         displayMenu();
-        cout << "Enter your choice: ";
+        cout << "Въведете вашия избор: ";
         cin >> choice;
+        cin.ignore(); 
 
         switch (choice) {
-        case 1: // Encrypt
-            cout << "Enter the input file name: ";
-            cin >> inputFile;
-            cout << "Enter the output file name: ";
-            cin >> outputFile;
-            cout << "Enter shift value (1-25): ";
+        case 1: 
+            cout << "Въведете текста за криптиране: ";
+            getline(cin, inputText); 
+            cout << "Въведете името на изходния файл: ";
+            getline(cin, outputFile);
+            cout << "Въведете стойност на изместването (1-25): ";
             cin >> shift;
-            encrypt(inputFile, outputFile, shift);
+            encrypt(inputText, outputFile, shift);
             break;
 
-        case 2: // Decrypt
-            cout << "Enter the input file name: ";
-            cin >> inputFile;
-            cout << "Enter the output file name: ";
-            cin >> outputFile;
-            cout << "Enter shift value (1-25): ";
+        case 2: 
+            cout << "Въведете името на входния файл: ";
+            getline(cin, inputFile); 
+            cout << "Въведете името на изходния файл: ";
+            getline(cin, outputFile);
+            cout << "Въведете стойност на изместването (1-25): ";
             cin >> shift;
-            decrypt(inputFile, outputFile, shift);
+            decrypt(inputFile, outputFile, shift); 
             break;
 
-        case 3: // Exit
-            cout << "Exiting..." << endl;
+        case 3: 
+            cout << "Изход..." << endl;
             return 0;
 
         default:
-            cout << "Invalid choice! Please try again." << endl;
+            cout << "Невалиден избор! Опитайте отново." << endl;
         }
+
+        cout << endl; 
     }
     return 0;
 }
